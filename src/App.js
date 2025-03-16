@@ -1,17 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import MainMenu from "./components/MainMenu";
-import Settings from "./components/Settings";
+import HomeScreen from "./screens/HomeScreen"; // Import HomeScreen
 
-function App() {
+export default function Index() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainMenu />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </Router>
+    <div style={{ display: "flex", flex: 1 }}>
+      <HomeScreen />
+    </div>
   );
 }
-
-export default App;
