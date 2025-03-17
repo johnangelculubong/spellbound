@@ -1,9 +1,17 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import backgroundImg from "../assets/ai-generated-8388403_1920.jpg";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Auto-redirect when landing on /settings only (without any subpath)
+    if (location.pathname === "/settings") {
+      navigate("/settings/general", { replace: true });
+    }
+  }, [location, navigate]);
 
   return (
     <div
@@ -13,56 +21,63 @@ export default function Settings() {
       {/* Sidebar */}
       <div className="w-1/4 h-full bg-white/10 rounded-[10px] border-2 border-white/50 backdrop-blur flex flex-col justify-between p-6">
         <div>
-          {/* Cinzel applied here */}
-          <h2 className="text-white text-2xl font-bold mb-8 font-cinzel left-0"
-          style={{ fontSize: "36px",
-            marginLeft: "80px",
-            paddingTop: "28px",
-            paddingBottom: "90px"
-           }}>
+          <h2
+            className="text-white text-2xl font-bold mb-8 font-cinzel left-0"
+            style={{
+              fontSize: "36px",
+              marginLeft: "80px",
+              paddingTop: "28px",
+              paddingBottom: "90px",
+            }}
+          >
             Game Option
           </h2>
-          <ul className="space-y-4">
-            {["General", "Audio", "Language", "Help"].map((item) => (
-              <li key={item}>
-                <button className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition font-poppins"
-                style={{ fontSize: "24px" }}>
-                  {item}
-                </button>
-              </li>
-            ))}
-          </ul>
+
+          {/* Sidebar Buttons */}
+          <div className="space-y-6">
+            <button
+              onClick={() => navigate("/settings/general")}
+              className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
+              style={{ fontSize: "24px" }}
+            >
+              General
+            </button>
+            <button
+              onClick={() => navigate("/settings/audio")}
+              className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
+              style={{ fontSize: "24px" }}
+            >
+              Audio
+            </button>
+            <button
+              onClick={() => navigate("/settings/language")}
+              className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
+              style={{ fontSize: "24px" }}
+            >
+              Language
+            </button>
+            <button
+              onClick={() => navigate("/settings/help")}
+              className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
+              style={{ fontSize: "24px" }}
+            >
+              Help
+            </button>
+          </div>
         </div>
 
         <button
           onClick={() => navigate("/")}
-          className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
+          className="w-full py-2 px-4 text-white border border-white/50 rounded-sm transition hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:border-white/80 font-poppins"
+          style={{ fontSize: "24px" }}
         >
           Back
         </button>
       </div>
 
       {/* Content Panel */}
-      <div className="w-[1300px] h-[800px] bg-white/10 rounded-[40px] border-2 border-white/50 backdrop-blur flex flex-col justify-between p-8 absolute top-[50px] left-[550px]">
-        <div className="space-y-[75px] pl-[80px] mt-[120px] font-poppins">
-          {["Graphics", "Display", "Video Quality"].map((setting) => (
-            <p
-              key={setting}
-              className="text-white text-[36px] cursor-pointer hover:underline"
-            >
-              {setting}
-            </p>
-          ))}
-        </div>
-
-        <div className="flex justify-between pt-8">
-          <button className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins">
-            Restore Changes
-          </button>
-          <button className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins">
-            Apply Changes
-          </button>
-        </div>
+      <div className="w-[1300px] h-[800px] bg-white/10 rounded-[40px] border-2 border-white/50 backdrop-blur flex flex-col justify-between p-8 absolute top-[50px] left-[550px] overflow-y-auto">
+        <Outlet />
       </div>
     </div>
   );
