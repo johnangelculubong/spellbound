@@ -13,6 +13,11 @@ export default function Settings() {
     }
   }, [location, navigate]);
 
+  // Function to handle back button click
+  const handleBackClick = () => {
+    navigate(-1); // Navigates to the previous page
+  };
+
   return (
     <div
       className="relative w-screen h-screen bg-cover bg-center flex"
@@ -66,8 +71,9 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Back Button - Calls handleBackClick function */}
         <button
-          onClick={() => navigate("/")}
+          onClick={handleBackClick}
           className="w-full py-2 px-4 text-white border border-white/50 rounded-sm transition hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:border-white/80 font-poppins"
           style={{ fontSize: "24px" }}
         >
