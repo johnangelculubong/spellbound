@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bgMusic from "../assets/audio/background.mp3";
+import clickSFX from "../assets/audio/click.mp3";
+import notifSFX from "../assets/audio/notification.mp3";
 
 export default function AudioSettings() {
   const navigate = useNavigate();
@@ -7,6 +10,90 @@ export default function AudioSettings() {
   const [sfx, setSfx] = useState(50);
   const [notification, setNotification] = useState(50);
   const [showModal, setShowModal] = useState(false);
+
+  const [audioContext, setAudioContext] = useState(null);
+  const [musicSource, setMusicSource] = useState(null);
+  const [musicGain, setMusicGain] = useState(null);
+
+  useEffect(() => {
+    // Load saved settings from localStorage
+    const savedMusic = localStorage.getItem("musicVolume");
+    const savedSfx = localStorage.getItem("sfxVolume");
+    const savedNotification = localStorage.getItem("notificationVolume");
+
+    if (savedMusic) setMusic(Number(savedMusic));
+    if (savedSfx) setSfx(Number(savedSfx));
+    if (savedNotification) setNotification(Number(savedNotification));
+  }, []);
+
+  useEffect(() => {
+    if (!audioContext) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      setAudioContext(ctx);
+      setupMusic(ctx);
+    }
+  }, []);
+
+  const setupMusic = async (ctx) => {
+    const response = await fetch(bgMusic);
+    const arrayBuffer = await response.arrayBuffer();
+    const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = music / 100; // Set initial music volume
+
+    const source = ctx.createBufferSource();
+    source.buffer = decodedBuffer;
+    source.loop = true;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+
+    setMusicSource(source);
+    setMusicGain(gainNode);
+  };
+
+  const handleVolumeChange = (type, value) => {
+    const volume = Number(value);
+
+    if (type === "music") {
+      setMusic(volume);
+      localStorage.setItem("musicVolume", volume);
+
+      if (musicGain) {
+        if (volume === 0) {
+          musicGain.gain.value = 0; // Mute music
+
+          // Stop and clear the existing music source
+          if (musicSource) {
+            musicSource.stop();
+            setMusicSource(null);
+          }
+        } else {
+          musicGain.gain.value = volume / 100;
+
+          // Restart music if it's not playing
+          if (!musicSource && audioContext) {
+            setupMusic(audioContext);
+          }
+        }
+      }
+    } else if (type === "sfx") {
+      setSfx(volume);
+      localStorage.setItem("sfxVolume", volume);
+      playSFX(clickSFX, volume);
+    } else if (type === "notification") {
+      setNotification(volume);
+      localStorage.setItem("notificationVolume", volume);
+      playSFX(notifSFX, volume);
+    }
+  };
+
+  const playSFX = (audioFile, volume) => {
+    const sfxAudio = new Audio(audioFile);
+    sfxAudio.volume = volume / 100;
+    sfxAudio.play();
+  };
 
   const handleRestore = () => {
     setShowModal(true);
@@ -16,24 +103,44 @@ export default function AudioSettings() {
     setMusic(50);
     setSfx(50);
     setNotification(50);
-    console.log("Audio settings reset to default!");
+    localStorage.setItem("musicVolume", 50);
+    localStorage.setItem("sfxVolume", 50);
+    localStorage.setItem("notificationVolume", 50);
+
+    if (musicGain) {
+      musicGain.gain.value = 0.5; // Reset music volume to default
+    }
+
     setShowModal(false);
+  };
+
+  // Apply Changes Function
+  const applyChanges = () => {
+    // Save current settings to localStorage
+    localStorage.setItem("musicVolume", music);
+    localStorage.setItem("sfxVolume", sfx);
+    localStorage.setItem("notificationVolume", notification);
+
+    // Update background music volume immediately
+    if (musicGain) {
+      musicGain.gain.value = music / 100;
+    }
+
+    // Play a click sound to confirm the changes
+    playSFX(clickSFX, sfx);
+
+    alert("Audio settings applied successfully!");
   };
 
   return (
     <div>
-      {/* Audio Panel */}
       <div>
-        <h2
-          className="text-white font-bold font-cinzel mb-4 text-center"
-          style={{
-            fontSize: "42px",
-          }}
-        >
+        <h2 className="text-white font-bold font-cinzel mb-4 text-center text-[42px]">
           Audio Settings
         </h2>
 
         <div className="space-y-6">
+          {/* Music Volume */}
           <div className="flex items-center justify-between">
             <span className="pl-[80px] mt-[40px] font-poppins text-white text-[36px] cursor-pointer hover:underline">
               Music
@@ -44,7 +151,7 @@ export default function AudioSettings() {
                 min="0"
                 max="100"
                 value={music}
-                onChange={(e) => setMusic(e.target.value)}
+                onChange={(e) => handleVolumeChange("music", e.target.value)}
                 className="w-full accent-white"
               />
               <span className="text-white font-poppins text-xl w-[50px]">
@@ -53,6 +160,7 @@ export default function AudioSettings() {
             </div>
           </div>
 
+          {/* SFX Volume */}
           <div className="flex items-center justify-between">
             <span className="pl-[80px] mt-[65px] font-poppins text-white text-[36px] cursor-pointer hover:underline">
               Sound Effects
@@ -63,7 +171,7 @@ export default function AudioSettings() {
                 min="0"
                 max="100"
                 value={sfx}
-                onChange={(e) => setSfx(e.target.value)}
+                onChange={(e) => handleVolumeChange("sfx", e.target.value)}
                 className="w-full accent-white"
               />
               <span className="text-white font-poppins text-xl w-[50px]">
@@ -72,6 +180,7 @@ export default function AudioSettings() {
             </div>
           </div>
 
+          {/* Notification Volume */}
           <div className="flex items-center justify-between">
             <span className="pl-[80px] mt-[65px] font-poppins text-white text-[36px] cursor-pointer hover:underline">
               System Notification
@@ -82,7 +191,9 @@ export default function AudioSettings() {
                 min="0"
                 max="100"
                 value={notification}
-                onChange={(e) => setNotification(e.target.value)}
+                onChange={(e) =>
+                  handleVolumeChange("notification", e.target.value)
+                }
                 className="w-full accent-white"
               />
               <span className="text-white font-poppins text-xl w-[50px]">
@@ -92,17 +203,21 @@ export default function AudioSettings() {
           </div>
         </div>
 
+        {/* Buttons */}
         <div className="flex justify-between pt-[120px] px-8 max-w-[700px] mx-auto">
-        <button
-          onClick={handleRestore}
-          className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
-        >
-          Restore Changes
-        </button>
-        <button className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins">
-          Apply Changes
-        </button>
-      </div>
+          <button
+            onClick={handleRestore}
+            className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
+          >
+            Restore Changes
+          </button>
+          <button 
+            onClick={applyChanges}
+            className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
+          >
+            Apply Changes
+          </button>
+        </div>
       </div>
 
       {/* Modal */}
@@ -110,18 +225,14 @@ export default function AudioSettings() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-8 w-[400px] text-center space-y-4">
             <h3 className="text-xl font-bold">Restore Changes?</h3>
-            <p className="text-gray-700">Are you sure you want to reset all audio settings?</p>
+            <p className="text-gray-700">
+              Are you sure you want to reset all audio settings?
+            </p>
             <div className="flex justify-around mt-4">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-200"
-              >
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-200">
                 Cancel
               </button>
-              <button
-                onClick={confirmRestore}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
+              <button onClick={confirmRestore} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
                 Yes, Restore
               </button>
             </div>

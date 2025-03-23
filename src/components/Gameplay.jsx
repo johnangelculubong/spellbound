@@ -25,6 +25,7 @@ export default function Gameplay() {
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submittedWords, setSubmittedWords] = useState([]); // Added state for submitted words
 
   const handleClick = (r, c) => {
     setSelected([...selected, { r, c }]);
@@ -32,11 +33,21 @@ export default function Gameplay() {
 
   const submitWord = () => {
     const word = selected.map((tile) => grid[tile.r][tile.c]).join("");
+    
+    // Check if the word is already submitted
+    if (submittedWords.includes(word)) {
+      setIsModalOpen(true);
+      return; // Stop further execution if word is repeated
+    }
+
     if (word.length >= 3) {
       setScore(score + word.length * 10);
       const newGrid = [...grid.map((row) => [...row])];
       selected.forEach(({ r, c }) => (newGrid[r][c] = null));
       dropTiles(newGrid);
+
+      // Add the valid word to the submitted words list
+      setSubmittedWords([...submittedWords, word]);
       setSelected([]);
     } else {
       setIsModalOpen(true);
@@ -87,6 +98,7 @@ export default function Gameplay() {
     );
     setScore(0);
     setSelected([]);
+    setSubmittedWords([]); // Reset submitted words when restarting
     setIsPaused(false);
   };
   const handleExit = () => navigate("/");
@@ -146,34 +158,33 @@ export default function Gameplay() {
 
         {/* Grid Container */}
         <div className="w-2/3 flex flex-col items-center p-4">
-          {/* Display Selected Letters */}
-          <div
-            className="mb-4 w-full flex items-center justify-center bg-[#8B6F47] p-2 rounded-md shadow-lg border-4 border-[#5D4B3A]"
-            style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)" }}
-          >
-            {selected.map((tile, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded border-2 bg-[#D4AF75] border-[#A87C4F] shadow-lg"
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  color: "#000",
-                  textShadow: "1px 1px 2px rgba(0,0,0,0.4)",
-                  backgroundImage: `url(${tileTexture})`,
-                  backgroundSize: "cover",
-                  textAlign: "center",
-                  lineHeight: "1.5",
-                }}
-              >
-                {grid[tile.r][tile.c]}
-              </div>
-            ))}
+          <div className="flex flex-col items-center mb-6 w-full">
+            {/* Display Selected Word */}
+            <div className="w-full flex justify-center items-center bg-[#D4AF75] p-2 rounded-md shadow-lg border-4 border-[#A87C4F]">
+              <h2 className="text-xl font-semibold text-black">
+                <strong>Selected Word: </strong>
+                {selected.length === 0
+                  ? "No word selected"
+                  : selected.map((tile) => grid[tile.r][tile.c]).join("")}
+              </h2>
+            </div>
+          </div>
+
+          {/* Display Submitted Words */}
+          <div className="flex flex-col items-center mb-6 w-full">
+            <div className="w-full flex justify-center items-center bg-[#D4AF75] p-2 rounded-md shadow-lg border-4 border-[#A87C4F]">
+              <h2 className="text-xl font-semibold text-black">
+                <strong>Submitted Words: </strong>
+                {submittedWords.length === 0
+                  ? "No words submitted"
+                  : submittedWords.join(", ")}
+              </h2>
+            </div>
           </div>
 
           {/* Grid */}
           <div
-            className="grid grid-cols-8 gap-1 bg-[#8B6F47] p-3 rounded-md shadow-xl border-4 border-[#5D4B3A]"
+            className="grid grid-cols-8 gap-2 bg-[#8B6F47] p-3 rounded-md shadow-xl border-4 border-[#5D4B3A]"
             style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)" }}
           >
             {grid.map((row, r) =>
@@ -182,9 +193,9 @@ export default function Gameplay() {
                   key={`${r}-${c}`}
                   onClick={() => handleClick(r, c)}
                   whileTap={{ scale: 0.95 }}
-                  className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded border-2 bg-[#D4AF75] border-[#A87C4F] shadow-lg cursor-pointer"
+                  className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded border-2 bg-[#D4AF75] border-[#A87C4F] shadow-lg cursor-pointer"
                   style={{
-                    fontSize: "2rem",
+                    fontSize: "2.5rem", // Larger font size
                     fontWeight: "bold",
                     color: "#000",
                     textShadow: "1px 1px 2px rgba(0,0,0,0.4)",
