@@ -15,6 +15,14 @@ const categoryBackgrounds = {
   "enchanted-realm": enchantedRealmImg,
 };
 
+// Button Colors Based on Category (with Fallback)
+const defaultButtonColors = {
+  apprentice: "bg-gray-300 hover:bg-gray-400",
+  scholar: "bg-gray-400 hover:bg-gray-500",
+  master: "bg-gray-500 hover:bg-gray-600",
+  grandmaster: "bg-gray-700 text-gray-400",
+};
+
 const buttonColors = {
   "mystic-library": {
     apprentice: "bg-lime-400 hover:bg-lime-500",
@@ -42,12 +50,12 @@ const buttonColors = {
   },
 };
 
-// Score thresholds for difficulty levels
+// Score-based difficulty unlocking
 const scoreThresholds = {
-  apprentice: 0,    // Always unlocked
-  scholar: 100,     // Unlocks at 100 points
-  master: 300,      // Unlocks at 300 points
-  grandmaster: 600, // Unlocks at 600 points
+  apprentice: 0,
+  scholar: 100,
+  master: 250,
+  grandmaster: 500,
 };
 
 export default function Difficulty() {
@@ -56,32 +64,29 @@ export default function Difficulty() {
   const [playerScore, setPlayerScore] = useState(0);
   const [unlockedDifficulties, setUnlockedDifficulties] = useState([]);
 
+  // Retrieve Score & Set Unlocks in One Effect
   useEffect(() => {
-    // Fetch player's score from localStorage (or API if connected)
-    const storedScore = localStorage.getItem("playerScore");
-    if (storedScore) {
-      setPlayerScore(parseInt(storedScore, 10));
-    }
+    const storedScore = parseInt(localStorage.getItem("playerScore") || "0", 10);
+    setPlayerScore(storedScore);
+    setUnlockedDifficulties(
+      Object.keys(scoreThresholds).filter((difficulty) => storedScore >= scoreThresholds[difficulty])
+    );
   }, []);
 
-  useEffect(() => {
-    // Determine which difficulties are unlocked
-    const unlocked = Object.keys(scoreThresholds).filter(
-      (difficulty) => playerScore >= scoreThresholds[difficulty]
-    );
-    setUnlockedDifficulties(unlocked);
-  }, [playerScore]);
-
+  // Navigate Back to Category Screen Instead of Play Screen
   const handleBackClick = () => {
-    navigate("/play");
+    navigate(`/play/${category}`);
   };
 
+  // Format Category Name for Display
   const formattedCategory = category
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
+  // Get Category Background or Default
   const backgroundImg = categoryBackgrounds[category] || mysticLibraryImg;
+  const categoryColors = buttonColors[category] || defaultButtonColors;
 
   return (
     <AnimatePresence>
@@ -97,10 +102,10 @@ export default function Difficulty() {
           backgroundPosition: "center",
         }}
       >
-        {/* Dark Overlay for Better Readability */}
+        {/* Dark Overlay for Readability */}
         <div className="absolute inset-0 bg-black/50"></div>
 
-        {/* Back Button & Title Row */}
+        {/* Header with Back Button */}
         <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
           <motion.button
             whileHover={{ scale: 1.1, transition: { type: "spring", stiffness: 300, damping: 15 } }}
@@ -123,7 +128,7 @@ export default function Difficulty() {
           <div className="w-12 h-12"></div>
         </div>
 
-        {/* Difficulty Buttons */}
+        {/* Difficulty Selection */}
         <div className="flex flex-col gap-6 z-10">
           {["apprentice", "scholar", "master", "grandmaster"].map((level, index) => {
             const isUnlocked = unlockedDifficulties.includes(level);
@@ -138,7 +143,7 @@ export default function Difficulty() {
                 transition={{ delay: 0.1 + index * 0.1 }}
                 className={`w-64 py-4 rounded-lg font-bold text-2xl transition-colors duration-300 shadow-xl font-poppins ${
                   isUnlocked
-                    ? buttonColors[category]?.[level] || "bg-white/80 hover:bg-white/90"
+                    ? categoryColors[level] || "bg-white/80 hover:bg-white/90"
                     : "bg-gray-500 text-gray-300 cursor-not-allowed"
                 }`}
               >

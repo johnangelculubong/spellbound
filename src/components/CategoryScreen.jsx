@@ -20,7 +20,7 @@ export default function CategoryScreen() {
 
   const handleCardClick = (categoryName) => {
     const formattedCategory = categoryName.toLowerCase().replace(/\s+/g, '-');
-    navigate(`/play/${formattedCategory}`);
+    navigate(`/play/${formattedCategory}/difficulty`); // Now directs to difficulty selection
   };
 
   return (

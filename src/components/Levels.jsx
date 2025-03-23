@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Unlock, Star } from "lucide-react";
@@ -6,22 +6,33 @@ import { Lock, Unlock, Star } from "lucide-react";
 export default function Levels() {
   const navigate = useNavigate();
   const { category, difficulty } = useParams();
+  const totalLevels = 15;
+  const [playerProgress, setPlayerProgress] = useState({});
 
-  const levels = Array.from({ length: 15 }, (_, i) => ({
-    id: i + 1,
-    isLocked: i !== 0, // Only Level 1 is unlocked for now
-    starsEarned: Math.floor(Math.random() * 4), // Dummy star data for now
-  }));
+  useEffect(() => {
+    // Fetch player's progress from localStorage
+    const savedProgress = JSON.parse(localStorage.getItem("playerProgress")) || {};
+    setPlayerProgress(savedProgress[difficulty] || {});
+  }, [difficulty]);
 
   const handleBackClick = () => {
     navigate(`/play/${category}`);
-  };  
+  };
 
   const handleLevelClick = (levelId, isLocked) => {
     if (!isLocked) {
       navigate(`/play/${category}/${difficulty}/level/${levelId}`);
     }
   };
+
+  const levels = Array.from({ length: totalLevels }, (_, i) => {
+    const levelNumber = i + 1;
+    return {
+      id: levelNumber,
+      isLocked: levelNumber !== 1 && !playerProgress[levelNumber - 1], // Unlock next level if previous is completed
+      starsEarned: playerProgress[levelNumber] || 0, // Default 0 stars if not played
+    };
+  });
 
   return (
     <AnimatePresence>
@@ -63,11 +74,7 @@ export default function Levels() {
               }`}
             >
               <div className="flex flex-col items-center mt-2">
-                {level.isLocked ? (
-                  <Lock size={40} />
-                ) : (
-                  <Unlock size={40} />
-                )}
+                {level.isLocked ? <Lock size={40} /> : <Unlock size={40} />}
                 <span className="text-lg font-semibold mt-2">Lv. {level.id}</span>
               </div>
 
@@ -78,9 +85,7 @@ export default function Levels() {
                       key={star}
                       size={20}
                       className={`${
-                        star <= level.starsEarned
-                          ? "text-yellow-400"
-                          : "text-gray-300"
+                        star <= level.starsEarned ? "text-yellow-400" : "text-gray-300"
                       }`}
                       fill={star <= level.starsEarned ? "#facc15" : "none"}
                     />

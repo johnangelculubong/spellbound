@@ -6,10 +6,12 @@ import AudioSettings from "./components/AudioSettings";
 import LanguageSettings from "./components/LanguageSettings";
 import HelpSettings from "./components/HelpSettings";
 import GeneralSettings from "./components/GeneralSettings";
-import CategoryScreen from "./components/CategoryScreen"; // Play screen (category)
-import Difficulty from "./components/Difficulty"; // Difficulty screen
-import Levels from "./components/Levels"; // Levels screen
+import CategoryScreen from "./components/CategoryScreen"; // Play category screen
+import Difficulty from "./components/Difficulty"; // Difficulty selection screen
+import Levels from "./components/Levels"; // Levels selection screen
 import Gameplay from "./components/Gameplay"; // Gameplay screen
+import Instruction from "./components/Instruction"; // Instruction component
+import "./App.css";
 
 function App() {
   return (
@@ -18,13 +20,16 @@ function App() {
         {/* Main Menu */}
         <Route path="/" element={<MainMenu />} />
 
-        {/* Play flow */}
-        <Route path="/play" element={<CategoryScreen />} />
-        <Route path="/play/:category" element={<Difficulty />} />
-        <Route path="/play/:category/:difficulty/levels" element={<Levels />} />
-        <Route path="/play/:category/:difficulty/level/:levelId" element={<Gameplay />} />
+        {/* Play Flow */}
+        <Route path="/play" element={<CategoryScreen />} /> {/* Select Category */}
+        <Route path="/play/:category" element={<Difficulty />} /> {/* Select Difficulty */}
+        <Route path="/play/:category/:difficulty" element={<Levels />} /> {/* Select Level */}
+        <Route path="/play/:category/:difficulty/level/:levelId" element={<Gameplay />} />{/* Start Game */}
 
-        {/* Settings with nested routes */}
+        {/* Instructions */}
+        <Route path="/instructions" element={<Instruction />} />
+
+        {/* Settings with Nested Routes */}
         <Route path="/settings" element={<Settings />}>
           <Route path="general" element={<GeneralSettings />} />
           <Route path="audio" element={<AudioSettings />} />

@@ -82,16 +82,15 @@ const MainMenu = () => {
         transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }}
       />
 
-<motion.img
-  src={dragonImg}
-  alt="Dragon"
-  className="absolute -top-15 -right-20 w-[850px] z-10"
-  initial={{ scale: 0.95, rotate: -2 }} // Slightly smaller and tilted
-  animate={{ scale: [0.95, 1, 0.95], rotate: [-2, 2, -2] }} // Breathing effect + subtle tilt
-  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-/>
-
-
+      {/* Dragon Animation */}
+      <motion.img
+        src={dragonImg}
+        alt="Dragon"
+        className="absolute -top-15 -right-20 w-[850px] z-10"
+        initial={{ scale: 0.95, rotate: -2 }} // Slightly smaller and tilted
+        animate={{ scale: [0.95, 1, 0.95], rotate: [-2, 2, -2] }} // Breathing effect + subtle tilt
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       {/* Header */}
       <motion.div
@@ -124,7 +123,7 @@ const MainMenu = () => {
         transition={{ delay: 0.6, duration: 0.8 }}
       >
         <Button text="Play" onClick={() => { playDarkButtonSound(); navigate("/play"); }} />
-        <Button text="Learn How to Play" onClick={() => { playDarkButtonSound(); alert("Show tutorial!"); }} />
+        <Button text="Learn How to Play" onClick={() => { playDarkButtonSound(); navigate("/instructions"); }} />
         <Button text="Settings" onClick={() => { playDarkButtonSound(); navigate("/settings"); }} />
         <Button text="Exit" onClick={() => { playDarkButtonSound(); alert("Exit Game!"); }} />
       </motion.div>
