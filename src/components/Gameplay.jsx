@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import tileTexture from "../assets/tile-texture.jpg";
@@ -13,8 +13,13 @@ const randomLetter = () => {
 };
 
 export default function Gameplay() {
-  const { levelId } = useParams();
+  const { levelId, category, difficulty } = useParams();
   const navigate = useNavigate();
+  const currentLevel = parseInt(levelId, 10) || 1;
+
+  const initialTime = 30 - currentLevel * 2; // Decrease time by 2s each level
+  const targetScore = 200 + currentLevel * 50;
+ 
 
   const [grid, setGrid] = useState(
     Array.from({ length: rows }, () =>
@@ -25,7 +30,10 @@ export default function Gameplay() {
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalFailed, setIsModalFailed] = useState(false);
   const [submittedWords, setSubmittedWords] = useState([]); // Added state for submitted words
+  const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [gameStatus, setGameStatus] = useState("playing");
 
   const handleClick = (r, c) => {
     setSelected([...selected, { r, c }]);
@@ -90,19 +98,52 @@ export default function Gameplay() {
 
   const handlePause = () => setIsPaused(true);
   const handleResume = () => setIsPaused(false);
+
+  const [timerId, setTimerId] = useState(null);
+
+useEffect(() => {
+  if (!isPaused && timeLeft > 0 && gameStatus === "playing") {
+    const id = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    setTimerId(id);
+    return () => clearInterval(id);
+  }
+  if (timeLeft === 0) {
+    setGameStatus("failed");
+    setIsModalFailed(true);
+  }
+  if (score >= targetScore) {
+    setGameStatus("completed");
+    setIsModalFailed(true);
+  }
+  return () => clearInterval(timerId);
+}, [isPaused, timeLeft, gameStatus, score, targetScore]);
+
+
   const handleRestart = () => {
     setGrid(
       Array.from({ length: rows }, () =>
         Array.from({ length: cols }, () => randomLetter())
       )
     );
+    setTimeLeft(initialTime);
+    setGameStatus("playing");
+    setIsModalOpen(false);
+    setIsModalFailed(false);
     setScore(0);
     setSelected([]);
-    setSubmittedWords([]); // Reset submitted words when restarting
+    setSubmittedWords([]);
     setIsPaused(false);
   };
-  const handleExit = () => navigate("/");
+  useEffect(() => {
+    handleRestart();
+  }, [levelId]);
 
+  const handleExit = () => navigate("/");
+  const handleNextLevel = () => {
+    navigate(`/play/${category}/${difficulty}/level/${currentLevel + 1}`);
+  };
   return (
     <AnimatePresence>
       <motion.div
@@ -123,6 +164,7 @@ export default function Gameplay() {
             <div className="w-full border-2 border-gray-400 py-2 text-center text-xl font-bold">
               {score}
             </div>
+            <div>Time Left: {timeLeft}s</div>
             <div className="text-2xl font-bold">LEVEL {levelId}</div>
             {/* Buttons for Submit & Clear Word */}
             <div className="flex space-x-4 w-full">
@@ -228,6 +270,36 @@ export default function Gameplay() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {isModalFailed && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+            {gameStatus === "failed" && (
+              <>
+                <h2 className="text-2xl font-bold text-red-600">You Failed!</h2>
+                <button
+                  onClick={handleRestart}
+                  className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600"
+                >
+                  Restart
+                </button>
+              </>
+            )}
+
+            {gameStatus === "completed" && (
+              <>
+                <h2 className="text-2xl font-bold text-green-600">Level Completed! Score: {score}</h2>
+                <button
+                  onClick={handleNextLevel}
+                  className="mt-4 px-6 py-2 bg-green-500 text-white rounded-md font-semibold hover:bg-green-600"
+                >
+                  Next Level
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

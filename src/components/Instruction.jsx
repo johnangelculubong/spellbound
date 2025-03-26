@@ -43,7 +43,7 @@ const Instruction = () => {
     if (step < tutorialSteps.length - 1) {
       setStep(step + 1);
     } else {
-      navigate("/play/default/easy/level/1");
+      navigate("/play");
     }
   };
 
