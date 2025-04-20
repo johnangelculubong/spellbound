@@ -32,7 +32,7 @@ export default function AudioSettings() {
       setAudioContext(ctx);
       setupMusic(ctx);
     }
-  }, []);
+  }, [audioContext]);
 
   const setupMusic = async (ctx) => {
     const response = await fetch(bgMusic);
@@ -59,25 +59,6 @@ export default function AudioSettings() {
     if (type === "music") {
       setMusic(volume);
       localStorage.setItem("musicVolume", volume);
-
-      if (musicGain) {
-        if (volume === 0) {
-          musicGain.gain.value = 0; // Mute music
-
-          // Stop and clear the existing music source
-          if (musicSource) {
-            musicSource.stop();
-            setMusicSource(null);
-          }
-        } else {
-          musicGain.gain.value = volume / 100;
-
-          // Restart music if it's not playing
-          if (!musicSource && audioContext) {
-            setupMusic(audioContext);
-          }
-        }
-      }
     } else if (type === "sfx") {
       setSfx(volume);
       localStorage.setItem("sfxVolume", volume);

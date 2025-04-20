@@ -7,6 +7,8 @@ import PauseMenu from "./PauseMenu";
 // Constants
 const rows = 8;
 const cols = 8;
+const level = 1;
+const requiredLetters = 3;
 
 const randomLetter = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -48,14 +50,20 @@ export default function Gameplay() {
   const [isPaused, setIsPaused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalFailed, setIsModalFailed] = useState(false);
+  const [isModalTooLong, setIsModalTooLong] = useState(false);
   const [submittedWords, setSubmittedWords] = useState([]);
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [gameStatus, setGameStatus] = useState("playing");
   const [showNotification, setShowNotification] = useState(true);  // Notification state
 
   const handleClick = (r, c) => {
+    if (selected.length >= requiredLetters) {
+      setIsModalTooLong(true);  // Show modal if too many letters selected
+      return;
+    }
     setSelected([...selected, { r, c }]);
   };
+  
 
   const submitWord = () => {
     const word = selected.map((tile) => grid[tile.r][tile.c]).join("");
@@ -228,8 +236,15 @@ export default function Gameplay() {
               >
                 CLEAR WORD
               </button>
+              
             </div>
           </div>
+          <div className="mt-4 h-[200px] bg-red-900/90 text-white p-4 rounded-xl shadow-lg w-full max-w-xl">
+  <p className="text-xl font-bold mb-6 text-center">Mission</p>
+  <p className="text-2xl text-center">
+    Form a word with <span className="text-yellow-300 font-bold">{requiredLetters} letters</span> only.
+  </p>
+</div>
 
           <div className="flex justify-around items-center mt-8">
             <button onClick={handlePause} className="bg-[#B22222] px-4 py-2 rounded shadow text-white hover:bg-[#A11B22]">⏸</button>
@@ -317,6 +332,20 @@ export default function Gameplay() {
           </div>
         </div>
       )}
+      {isModalTooLong && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+      <h2 className="text-xl font-semibold text-red-500">Too Many Letters!</h2>
+      <p className="mt-4">You can only select up to {requiredLetters} letters for this level.</p>
+      <button
+        onClick={() => setIsModalTooLong(false)}
+        className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
       
       {/* Notification */}
       {showNotification && (
