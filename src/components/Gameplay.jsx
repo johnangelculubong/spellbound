@@ -3,6 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import tileTexture from "../assets/tile-texture.jpg";
 import PauseMenu from "./PauseMenu";
+import {
+  playSFX,
+  playNotification,
+  setSFXVolume,
+  setNotificationVolume,
+  restoreVolumes,
+} from "../utils/AudioManager.jsx";
 
 // Constants
 const rows = 8;

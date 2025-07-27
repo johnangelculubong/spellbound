@@ -7,6 +7,13 @@ import piratesParleyImg from "../assets/pirates-parley.png";
 import nebulaLexisImg from "../assets/nebula-lexis.png";
 import enchantedRealmImg from "../assets/enchanted-realm.png";
 import backgroundImg from "../assets/ai-generated-8388403_1920.jpg";
+import {
+  playSFX,
+  playNotification,
+  setSFXVolume,
+  setNotificationVolume,
+  restoreVolumes,
+} from "../utils/AudioManager.jsx";
 
 const categories = [
   { name: "Mystic Library", image: mysticLibraryImg },

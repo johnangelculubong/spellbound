@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function LanguageSettings() {
-  const navigate = useNavigate();
   const [language, setLanguage] = useState("");
   const [showModal, setShowModal] = useState(false);
 

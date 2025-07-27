@@ -15,7 +15,7 @@ export default function Settings() {
 
   // Function to handle back button click
   const handleBackClick = () => {
-    navigate(-1); // Navigates to the previous page
+    navigate("/"); // your main menu route
   };
 
   return (

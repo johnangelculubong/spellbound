@@ -1,3 +1,19 @@
 body {
-  cursor: url("/public/assets/claw.png") 32 32, auto;
+  cursor: url('assets/claw.png') 32 32, auto;
+}
+
+.graphics-low {
+  filter: brightness(0.8) blur(1px);
+}
+
+.graphics-medium {
+  filter: none;
+}
+
+.graphics-high {
+  filter: brightness(1.1) contrast(1.1);
+}
+
+.graphics-ultra {
+  filter: brightness(1.2) contrast(1.2) drop-shadow(0 0 8px #f0f);
 }

@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  playSFX,
+  playNotification,
+  setSFXVolume,
+  setNotificationVolume,
+  restoreVolumes,
+} from "../utils/AudioManager.jsx";
 
 // Backgrounds for categories
 import mysticLibraryImg from "../assets/mystic-library.png";

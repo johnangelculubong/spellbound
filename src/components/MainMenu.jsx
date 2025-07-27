@@ -1,67 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "./Button";
-import backgroundImg from "../assets/ai-generated-8388403_1920.jpg"; // Library BG
-import dragonImg from "../assets/comodo-7014193_1920.png"; // Dragon
-import bgMusic from "../assets/audio/background.mp3"; // Background Music
-import darkClickSFX from "../assets/audio/click.mp3"; // Button Click SFX
+import backgroundImg from "../assets/ai-generated-8388403_1920.jpg";
+import dragonImg from "../assets/comodo-7014193_1920.png";
+import bgMusic from "../assets/audio/background.mp3";
+import darkClickSFX from "../assets/audio/click.mp3";
 import { useNavigate } from "react-router-dom";
+import {
+  playMusic,
+  stopMusic,
+  playSFX,
+} from "../utils/AudioManager.jsx";
 
 const MainMenu = () => {
   const navigate = useNavigate();
-  const [audioContext, setAudioContext] = useState(null);
-  const [audioBuffer, setAudioBuffer] = useState(null);
-  const [sourceNode, setSourceNode] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    const initAudio = async () => {
-      if (!audioContext) {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        setAudioContext(ctx);
-
-        // Load background music
-        const response = await fetch(bgMusic);
-        const arrayBuffer = await response.arrayBuffer();
-        const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
-        setAudioBuffer(decodedBuffer);
-      }
+    playMusic(bgMusic); // Controlled by global volume
+    return () => {
+      stopMusic(); // Clean up when leaving
     };
-
-    initAudio();
   }, []);
 
-  useEffect(() => {
-    if (audioContext && audioBuffer && !isPlaying) {
-      const playBackgroundMusic = () => {
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.loop = true;
-        source.connect(audioContext.destination);
-        source.start(0);
-        setSourceNode(source);
-        setIsPlaying(true);
-      };
-
-      if (audioContext.state === "suspended") {
-        audioContext.resume().then(playBackgroundMusic);
-      } else {
-        playBackgroundMusic();
-      }
-    }
-
-    return () => {
-      if (sourceNode) {
-        sourceNode.stop();
-      }
-    };
-  }, [audioContext, audioBuffer]);
-
-  // Play dark fantasy button click sound
-  const playDarkButtonSound = () => {
-    const audio = new Audio(darkClickSFX);
-    audio.volume = 0.7; // Adjust if needed (0.0 - 1.0)
-    audio.play();
+  const handleClick = (path) => {
+    playSFX(darkClickSFX); // Controlled by global SFX volume
+    navigate(path);
   };
 
   return (
@@ -72,7 +35,7 @@ const MainMenu = () => {
       transition={{ duration: 0.7 }}
       className="relative w-screen h-screen overflow-hidden"
     >
-      {/* Moving Background Image */}
+      {/* Background */}
       <motion.img
         src={backgroundImg}
         alt="Library Background"
@@ -82,17 +45,17 @@ const MainMenu = () => {
         transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }}
       />
 
-      {/* Dragon Animation */}
+      {/* Dragon */}
       <motion.img
         src={dragonImg}
         alt="Dragon"
         className="absolute -top-15 -right-20 w-[850px] z-10"
-        initial={{ scale: 0.95, rotate: -2 }} // Slightly smaller and tilted
-        animate={{ scale: [0.95, 1, 0.95], rotate: [-2, 2, -2] }} // Breathing effect + subtle tilt
+        initial={{ scale: 0.95, rotate: -2 }}
+        animate={{ scale: [0.95, 1, 0.95], rotate: [-2, 2, -2] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Header */}
+      {/* Title */}
       <motion.div
         className="absolute top-10 w-full flex justify-center z-20"
         initial={{ opacity: 0, y: -50 }}
@@ -122,10 +85,14 @@ const MainMenu = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.8 }}
       >
-        <Button text="Play" onClick={() => { playDarkButtonSound(); navigate("/play"); }} />
-        <Button text="Learn How to Play" onClick={() => { playDarkButtonSound(); navigate("/instructions"); }} />
-        <Button text="Settings" onClick={() => { playDarkButtonSound(); navigate("/settings"); }} />
-        <Button text="Exit" onClick={() => { playDarkButtonSound(); alert("Exit Game!"); }} />
+        <Button text="Play" onClick={() => handleClick("/play")} />
+        <Button text="Learn How to Play" onClick={() => handleClick("/instructions")} />
+        <Button text="Settings" onClick={() => handleClick("/settings")} />
+        <Button text="Exit" onClick={() => {
+         playSFX(darkClickSFX);
+         navigate("/goodbye");
+         }} />
+
       </motion.div>
     </motion.div>
   );

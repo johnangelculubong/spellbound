@@ -7,11 +7,12 @@ export default function Levels() {
   const navigate = useNavigate();
   const { category, difficulty } = useParams();
 
-  const levels = Array.from({ length: 15 }, (_, i) => ({
-    id: i + 1,
-    isLocked: i !== 0, // Only Level 1 is unlocked for now
-    starsEarned: Math.floor(Math.random() * 4), // Dummy star data for now
-  }));
+  const levels = [
+    { id: 1, isLocked: false, starsEarned: Math.floor(Math.random() * 4) },
+    { id: 2, isLocked: true, starsEarned: 0 },
+    { id: 3, isLocked: true, starsEarned: 0 },
+  ];
+  
 
   const handleBackClick = () => {
     navigate(`/play/${category}`);
@@ -49,7 +50,7 @@ export default function Levels() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-5 gap-8 mt-24">
+        <div className="grid grid-cols-3 gap-8 mt-32 justify-center">
           {levels.map((level) => (
             <motion.button
               key={level.id}
@@ -71,22 +72,23 @@ export default function Levels() {
                 <span className="text-lg font-semibold mt-2">Lv. {level.id}</span>
               </div>
 
-              {!level.isLocked && (
-                <div className="flex gap-2 mb-2">
-                  {[1, 2, 3].map((star) => (
-                    <Star
-                      key={star}
-                      size={20}
-                      className={`${
-                        star <= level.starsEarned
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                      fill={star <= level.starsEarned ? "#facc15" : "none"}
-                    />
-                  ))}
-                </div>
-              )}
+              {!level.isLocked && level.starsEarned > 0 && (
+  <div className="flex gap-2 mb-2">
+    {[1, 2, 3].map((star) => (
+      <Star
+        key={star}
+        size={20}
+        className={`${
+          star <= level.starsEarned
+            ? "text-yellow-400"
+            : "text-gray-300"
+        }`}
+        fill={star <= level.starsEarned ? "#facc15" : "none"}
+      />
+    ))}
+  </div>
+)}
+
             </motion.button>
           ))}
         </div>
