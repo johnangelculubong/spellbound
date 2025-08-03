@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useLanguage } from "../hooks/useLanguage";
 import backgroundImg from "../assets/ai-generated-8388403_1920.jpg";
 
 export default function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Auto-redirect when landing on /settings only (without any subpath)
@@ -15,7 +17,7 @@ export default function Settings() {
 
   // Function to handle back button click
   const handleBackClick = () => {
-    navigate("/"); // your main menu route
+    navigate(-1); // your main menu route
   };
 
   return (
@@ -35,7 +37,7 @@ export default function Settings() {
               paddingBottom: "90px",
             }}
           >
-            Game Option
+            {t('gameOptions')}
           </h2>
 
           {/* Sidebar Buttons */}
@@ -45,28 +47,28 @@ export default function Settings() {
               className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
               style={{ fontSize: "24px" }}
             >
-              General
+              {t('general')}
             </button>
             <button
               onClick={() => navigate("/settings/audio")}
               className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
               style={{ fontSize: "24px" }}
             >
-              Audio
+              {t('audio')}
             </button>
             <button
               onClick={() => navigate("/settings/language")}
               className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
               style={{ fontSize: "24px" }}
             >
-              Language
+              {t('language')}
             </button>
             <button
               onClick={() => navigate("/settings/help")}
               className="w-full py-2 px-4 text-white border border-[#B8860B] hover:bg-[#B8860B] hover:text-black transition hover:scale-105 hover:shadow-xl hover:border-white/80 font-poppins"
               style={{ fontSize: "24px" }}
             >
-              Help
+              {t('help')}
             </button>
           </div>
         </div>
@@ -77,7 +79,7 @@ export default function Settings() {
           className="w-full py-2 px-4 text-white border border-white/50 rounded-sm transition hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:border-white/80 font-poppins"
           style={{ fontSize: "24px" }}
         >
-          Back
+          {t('back')}
         </button>
       </div>
 

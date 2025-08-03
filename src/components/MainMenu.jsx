@@ -6,6 +6,7 @@ import dragonImg from "../assets/comodo-7014193_1920.png";
 import bgMusic from "../assets/audio/background.mp3";
 import darkClickSFX from "../assets/audio/click.mp3";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../hooks/useLanguage";
 import {
   playMusic,
   stopMusic,
@@ -14,6 +15,7 @@ import {
 
 const MainMenu = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     playMusic(bgMusic); // Controlled by global volume
@@ -27,6 +29,14 @@ const MainMenu = () => {
     navigate(path);
   };
 
+  const handleExit = () => {
+    playSFX(darkClickSFX);
+    // Show confirmation dialog
+    if (window.confirm(t('exitGameMessage'))) {
+      navigate("/goodbye");
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,7 +48,7 @@ const MainMenu = () => {
       {/* Background */}
       <motion.img
         src={backgroundImg}
-        alt="Library Background"
+        alt={t('menuBackgroundAlt')}
         className="absolute inset-0 w-full h-full object-cover z-0"
         initial={{ scale: 1.1 }}
         animate={{ x: [-50, 50, -50] }}
@@ -48,7 +58,7 @@ const MainMenu = () => {
       {/* Dragon */}
       <motion.img
         src={dragonImg}
-        alt="Dragon"
+        alt={t('dragonAlt') || 'Dragon'}
         className="absolute -top-15 -right-20 w-[850px] z-10"
         initial={{ scale: 0.95, rotate: -2 }}
         animate={{ scale: [0.95, 1, 0.95], rotate: [-2, 2, -2] }}
@@ -74,7 +84,7 @@ const MainMenu = () => {
             `,
           }}
         >
-          Spellbound
+          {t('gameTitle')}
         </h1>
       </motion.div>
 
@@ -85,14 +95,10 @@ const MainMenu = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.8 }}
       >
-        <Button text="Play" onClick={() => handleClick("/play")} />
-        <Button text="Learn How to Play" onClick={() => handleClick("/instructions")} />
-        <Button text="Settings" onClick={() => handleClick("/settings")} />
-        <Button text="Exit" onClick={() => {
-         playSFX(darkClickSFX);
-         navigate("/goodbye");
-         }} />
-
+        <Button text={t('play')} onClick={() => handleClick("/play")} />
+        <Button text={t('learnHowToPlay')} onClick={() => handleClick("/instructions")} />
+        <Button text={t('settings')} onClick={() => handleClick("/settings")} />
+        <Button text={t('exit')} onClick={handleExit} />
       </motion.div>
     </motion.div>
   );

@@ -1,3 +1,13 @@
+// Import sound files
+import wordSubmitSfx from '../assets/audio/word-submit.wav';
+import wordErrorSfx from '../assets/audio/word-error.mp3';
+import victory3StarsSfx from '../assets/audio/victory-3-stars.mp3';
+import victory2StarsSfx from '../assets/audio/victory-2-stars.wav';
+import victory1StarSfx from '../assets/audio/victory-1-star.wav';
+import timesUpSfx from '../assets/audio/times-up.wav'; 
+import tileClickSfx from '../assets/audio/tile-click.wav';
+import tileDeselectSfx from '../assets/audio/tile-deselect.wav';
+
 let musicAudio = null;
 let sfxVolume = 0.5; // 0.0 - 1.0
 let musicVolume = 0.5; // 0.0 - 1.0
@@ -32,7 +42,6 @@ export const playMusic = (file) => {
   });
 };
 
-
 export const stopMusic = () => {
   if (musicAudio) {
     musicAudio.pause();
@@ -61,7 +70,6 @@ export const setMusicVolume = (volume) => {
     }
   }
 };
-
 
 export const setSFXVolume = (volume) => {
   sfxVolume = clampVolume(volume / 100);
@@ -94,5 +102,71 @@ export const playNotification = (file) => {
   audio.volume = clampVolume(notificationVolume);
   audio.play().catch((err) => {
     console.warn("Notification sound failed:", err);
+  });
+};
+
+// New sound functions for gameplay
+export const playWordSubmit = () => {
+  const audio = new Audio(wordSubmitSfx);
+  audio.volume = clampVolume(sfxVolume);
+  audio.play().catch((err) => {
+    console.warn("Word submit sound failed:", err);
+  });
+};
+
+export const playWordError = () => {
+  const audio = new Audio(wordErrorSfx);
+  audio.volume = clampVolume(sfxVolume);
+  audio.play().catch((err) => {
+    console.warn("Word error sound failed:", err);
+  });
+};
+
+export const playVictoryByStars = (stars) => {
+  let soundFile;
+  
+  switch(stars) {
+    case 3:
+      soundFile = victory3StarsSfx;
+      break;
+    case 2:
+      soundFile = victory2StarsSfx;
+      break;
+    case 1:
+    default:
+      soundFile = victory1StarSfx;
+      break;
+  }
+  
+  const audio = new Audio(soundFile);
+  audio.volume = clampVolume(notificationVolume);
+  audio.play().catch((err) => {
+    console.warn("Victory sound failed:", err);
+  });
+};
+
+// Add this new function for times up
+export const playTimesUp = () => {
+  const audio = new Audio(timesUpSfx);
+  audio.volume = clampVolume(notificationVolume);
+  audio.play().catch((err) => {
+    console.warn("Times up sound failed:", err);
+  });
+};
+
+export const playTileClick = () => {
+  const audio = new Audio(tileClickSfx);
+  audio.volume = clampVolume(sfxVolume);
+  audio.play().catch((err) => {
+    console.warn("Tile click sound failed:", err);
+  });
+};
+
+// Add this new function
+export const playTileDeselect = () => {
+  const audio = new Audio(tileDeselectSfx);
+  audio.volume = clampVolume(sfxVolume);
+  audio.play().catch((err) => {
+    console.warn("Tile deselect sound failed:", err);
   });
 };

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "../hooks/useLanguage";
 
 export default function GeneralSettings() {
+  const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [graphics, setGraphics] = useState("Medium");
   const [resolution, setResolution] = useState("1920x1080");
   const [videoQuality, setVideoQuality] = useState("Full HD");
   const [message, setMessage] = useState("");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [graphicsClass, setGraphicsClass] = useState("graphics-medium");
 
   const graphicsOptions = ["Low", "Medium", "High", "Ultra"];
@@ -32,13 +35,19 @@ export default function GeneralSettings() {
     setGraphicsClass("graphics-medium");
     console.log("Changes restored to defaults!");
     setShowModal(false);
+    showSuccessToast(t('settingsRestoredSuccess'));
+  };
+
+  const showSuccessToast = (message) => {
+    setShowSuccessMessage(message);
+    setTimeout(() => setShowSuccessMessage(""), 3000);
   };
 
   const applyChanges = () => {
     const settings = { graphics, resolution, videoQuality };
     localStorage.setItem("generalSettings", JSON.stringify(settings));
 
-    setMessage("Settings saved successfully!");
+    showSuccessToast(t('generalSettingsAppliedSuccess'));
     console.log("Settings applied:", settings);
 
     // Short delay before reload to show message
@@ -87,24 +96,24 @@ export default function GeneralSettings() {
         className="text-white font-bold font-cinzel mb-10 text-center"
         style={{ fontSize: "42px" }}
       >
-        General Settings
+        {t('generalSettings')}
       </h2>
 
       <div className="flex flex-col items-center space-y-12">
         <SettingSlider
-          label="GRAPHICS"
+          label={t('graphics')}
           value={graphics}
           options={graphicsOptions}
           setValue={setGraphics}
         />
         <SettingSlider
-          label="DISPLAY"
+          label={t('display')}
           value={resolution}
           options={resolutionOptions}
           setValue={setResolution}
         />
         <SettingSlider
-          label="VIDEO QUALITY"
+          label={t('videoQuality')}
           value={videoQuality}
           options={videoQualityOptions}
           setValue={setVideoQuality}
@@ -114,43 +123,44 @@ export default function GeneralSettings() {
       <div className="flex justify-between pt-[120px] px-8 max-w-[700px] mx-auto">
         <button
           onClick={handleRestore}
-          className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
+          className="text-white py-3 px-6 border border-white hover:bg-white hover:text-black transition-all duration-300 font-poppins text-lg hover:scale-105 hover:shadow-lg"
         >
-          Restore Changes
+          {t('restoreChanges')}
         </button>
         <button
           onClick={applyChanges}
-          className="text-white py-2 px-4 border border-white hover:bg-white hover:text-black transition font-poppins"
+          className="text-white py-3 px-6 border border-[#B8860B] bg-[#B8860B]/20 hover:bg-[#B8860B] hover:text-black transition-all duration-300 font-poppins text-lg hover:scale-105 hover:shadow-lg"
         >
-          Apply Changes
+          {t('applyChanges')}
         </button>
       </div>
 
-      {message && (
-        <div className="text-center pt-6 text-green-400 font-semibold text-lg">
-          {message}
+      {/* Success Message Toast */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 font-poppins animate-pulse">
+          {showSuccessMessage}
         </div>
       )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl p-8 w-[400px] text-center space-y-4">
-            <h3 className="text-xl font-bold">Restore Changes?</h3>
+          <div className="bg-white rounded-xl p-8 w-[400px] text-center space-y-4 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-800">{t('confirmRestoreGeneral')}</h3>
             <p className="text-gray-700">
-              Are you sure you want to reset to default?
+              {t('restoreGeneralConfirmMessage')}
             </p>
-            <div className="flex justify-around mt-4">
+            <div className="flex justify-around mt-6">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-200"
+                className="px-6 py-2 border border-gray-400 rounded hover:bg-gray-200 transition-colors duration-200 font-poppins"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={confirmRestore}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 font-poppins"
               >
-                Yes, Restore
+                {t('yesReset')}
               </button>
             </div>
           </div>
