@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Trophy, ArrowRight, Home, RotateCcw, Zap, Target, Clock, Award } from "lucide-react";
-import tileTexture from "../assets/tile-texture.jpg";
+import tileTexture from "../assets/parchment-texture.jpg";
 import PauseMenu from "./PauseMenu";
 import { useLanguage } from "../hooks/useLanguage";
 import {
@@ -325,6 +325,45 @@ export default function Gameplay() {
   const { t } = useLanguage();
   const currentLevel = parseInt(levelId, 10) || 1;
 
+  // Dynamic background function
+  const getCurrentBackground = useCallback(() => {
+    try {
+      // First try to get from localStorage (most reliable)
+      const savedCategory = JSON.parse(localStorage.getItem('selectedCategory'));
+      if (savedCategory?.urlKey && categoryBackgrounds[savedCategory.urlKey]) {
+        return categoryBackgrounds[savedCategory.urlKey];
+      }
+      
+      // Fallback to URL parameter
+      if (categoryBackgrounds[category]) {
+        return categoryBackgrounds[category];
+      }
+      
+      // Final fallback
+      return mysticLibraryImg;
+    } catch (error) {
+      console.warn('Error getting category background:', error);
+      return categoryBackgrounds[category] || mysticLibraryImg;
+    }
+  }, [category]);
+
+  // Optional: Add category-specific accent colors for even more immersion
+  const getCategoryAccentColor = useCallback(() => {
+    const categoryColors = {
+      'mystic-library': 'from-purple-500/30 to-indigo-600/30',
+      'pirates-parley': 'from-orange-500/30 to-red-600/30',
+      'nebula-lexis': 'from-cyan-500/30 to-blue-600/30',
+      'enchanted-realm': 'from-emerald-500/30 to-green-600/30'
+    };
+    
+    try {
+      const savedCategory = JSON.parse(localStorage.getItem('selectedCategory'));
+      return categoryColors[savedCategory?.urlKey] || categoryColors[category] || 'from-purple-500/30 to-indigo-600/30';
+    } catch {
+      return categoryColors[category] || 'from-purple-500/30 to-indigo-600/30';
+    }
+  }, [category]);
+
   // Enhanced time modifiers with level scaling
   const timeModifiers = {
     apprentice: 150 - (currentLevel - 1) * 10,
@@ -380,7 +419,6 @@ export default function Gameplay() {
   const [bestWord, setBestWord] = useState({ word: "", score: 0 });
 
   const progress = Math.min((score / targetScore) * 100, 100);
-  const backgroundImg = categoryBackgrounds[category] || mysticLibraryImg;
 
   // Initialize grid with better letter distribution
   const initializeGrid = useCallback(() => {
@@ -391,39 +429,39 @@ export default function Gameplay() {
 
   // Enhanced tile selection logic
   const handleClick = (r, c) => {
-  if (gameStatus !== "playing" || isPaused) return;
-  
-  const isAlreadySelected = selected.some(tile => tile.r === r && tile.c === c);
-  if (isAlreadySelected) {
-    // Remove this tile and all tiles selected after it
-    const tileIndex = selected.findIndex(tile => tile.r === r && tile.c === c);
-    setSelected(selected.slice(0, tileIndex));
-    playTileDeselect(); // Add this for deselecting tiles
-    return;
-  }
+    if (gameStatus !== "playing" || isPaused) return;
+    
+    const isAlreadySelected = selected.some(tile => tile.r === r && tile.c === c);
+    if (isAlreadySelected) {
+      // Remove this tile and all tiles selected after it
+      const tileIndex = selected.findIndex(tile => tile.r === r && tile.c === c);
+      setSelected(selected.slice(0, tileIndex));
+      playTileDeselect(); // Add this for deselecting tiles
+      return;
+    }
 
-  if (selected.length >= currentRequirements.max) {
-    setIsModalOpen(true);
-    playWordError();
-    return;
-  }
+    if (selected.length >= currentRequirements.max) {
+      setIsModalOpen(true);
+      playWordError();
+      return;
+    }
 
-  // Check adjacency logic...
-  if (selected.length > 0) {
-    const lastTile = selected[selected.length - 1];
-    const isAdjacent = Math.abs(r - lastTile.r) <= 1 && Math.abs(c - lastTile.c) <= 1;
-    if (!isAdjacent) {
-      if (difficulty === "grandmaster") {
-        playWordError();
-        return;
+    // Check adjacency logic...
+    if (selected.length > 0) {
+      const lastTile = selected[selected.length - 1];
+      const isAdjacent = Math.abs(r - lastTile.r) <= 1 && Math.abs(c - lastTile.c) <= 1;
+      if (!isAdjacent) {
+        if (difficulty === "grandmaster") {
+          playWordError();
+          return;
+        }
       }
     }
-  }
 
-  // SUCCESS - Tile selected!
-  playTileClick(); // Sound for selecting tiles
-  setSelected([...selected, { r, c }]);
-};
+    // SUCCESS - Tile selected!
+    playTileClick(); // Sound for selecting tiles
+    setSelected([...selected, { r, c }]);
+  };
 
   // Enhanced word submission with better feedback
   const submitWord = useCallback(() => {
@@ -690,7 +728,7 @@ export default function Gameplay() {
             transition={{ type: "spring", duration: 0.6 }}
             className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 p-8 rounded-3xl shadow-2xl text-center max-w-lg w-full mx-4 overflow-hidden"
             style={{
-              backgroundImage: `url(${backgroundImg})`,
+              backgroundImage: `url(${getCurrentBackground()})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundBlendMode: "overlay"
@@ -865,10 +903,19 @@ export default function Gameplay() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -50 }}
         transition={{ duration: 0.6 }}
-        className={`flex flex-row items-stretch bg-[#222] text-white min-h-screen w-screen overflow-hidden ${isPaused ? "filter blur-md" : ""}`}
+        className={`flex flex-row items-stretch text-white min-h-screen w-screen overflow-hidden relative ${isPaused ? "filter blur-md" : ""}`}
+        style={{
+          backgroundImage: `url(${getCurrentBackground()})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat"
+        }}
       >
-        {/* Enhanced Sidebar */}
-        <div className="w-1/3 bg-gradient-to-b from-[#1b1b1b] to-[#0f0f0f] text-white flex flex-col justify-between p-4 shadow-2xl border-r-2 border-gray-700">
+        {/* Add dark overlay for better UI readability */}
+        <div className="absolute inset-0 bg-black/60 z-0" />
+
+        {/* Enhanced Sidebar with backdrop blur */}
+        <div className="relative z-10 w-1/3 bg-gradient-to-b from-[#1b1b1b]/90 to-[#0f0f0f]/90 backdrop-blur-md text-white flex flex-col justify-between p-4 shadow-2xl border-r-2 border-gray-700">
           <div className="flex flex-col gap-4 items-center">
             {/* Enhanced Title */}
             <motion.h1
@@ -1048,8 +1095,8 @@ export default function Gameplay() {
           </div>
         </div>
 
-        {/* Enhanced Main Grid Section */}
-        <div className="w-2/3 flex flex-col items-center p-6 bg-gradient-to-br from-gray-900 to-gray-800 relative">
+        {/* Enhanced Main Grid Section with backdrop blur */}
+        <div className="relative z-10 w-2/3 flex flex-col items-center p-6 bg-gradient-to-br from-gray-900/70 to-gray-800/70 backdrop-blur-sm">
           {/* Score Animation */}
           <ScoreAnimation />
 
